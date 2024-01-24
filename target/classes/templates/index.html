@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <title>Customer Management System</title>
+</head>
+<body>
+
+<div class="container mt-5">
+  <div id="app">
+  </div>
+</div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+  renderApp();
+});
+
+let authenticated = false;
+let authToken;
+
+function renderApp() {
+  const appContainer = document.getElementById("app");
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("auth")) {
+    authenticated = false;
+  }
+
+  if (authenticated) {
+    showHomeScreen();
+  } else {
+    showLoginScreen();
+  }
+}
+
+function showHomeScreen() {
+  loadContent("http://localhost:8081/students");
+}
+function showLoginScreen() {
+  loadContent("http://localhost:8081/CustomerLogin");
+}
+function loadContent(filename, callback) {
+  const appContainer = document.getElementById("app");
+
+  fetch(filename)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to load ${filename}`);
+      }
+      return response.text();
+    })
+    .then((content) => {
+      appContainer.innerHTML = content;
+      if (callback) {
+        callback();
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading content:", error);
+    });
+}
+
+function authenticateUser() {
+  const correctEmail = "test@sunbasedata.com";
+  const correctPassword = "Test@123";
+
+  const enteredEmail = document.getElementById("loginEmail").value;
+  const enteredPassword = document.getElementById("loginPassword").value;
+  let formData = {
+    login_id: enteredEmail,
+    password: enteredPassword,
+  };
+
+  if (enteredEmail === correctEmail && enteredPassword === correctPassword) {
+    fetch("http://localhost:8081/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        authenticated = true;
+        authToken = data.access_token; // Save the token
+        localStorage.setItem("token", authToken);
+        showHomeScreen();
+        // Handle success, e.g., show a success message to the user
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        // Handle errors, e.g., show an error message to the user
+      });
+  } else {
+    alert("Invalid email or password. Please try again.");
+  }
+}
+
+
+function handleSync() {
+  // Use the authToken for syncing data
+  const authToken = localStorage.getItem("token")
+  console.log("Syncing data with token:", localStorage.getItem("token"));
+   fetch("http://localhost:8081/sync", {
+      method: "GET",
+      headers: {
+        "Authorization":authToken,
+        "Content-Type": "application/json",
+      },
+      body: {}
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        alert("Sync successfull")
+        console.log("success", data)
+        // Handle success, e.g., show a success message to the user
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        // Handle errors, e.g., show an error message to the user
+      });
+}
+
+
+
+
+
+</script>
+</body>
+</html>
