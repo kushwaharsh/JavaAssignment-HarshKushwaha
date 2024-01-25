@@ -1,5 +1,4 @@
 package net.sunbase.assignment.controller;
-
 import net.sunbase.assignment.client.CustomerApiClient;
 import net.sunbase.assignment.repository.CustomerRepository;
 import net.sunbase.assignment.entity.Customer;
@@ -9,129 +8,104 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
 @Controller
 public class CustomerController {
-
 	private CustomerService customerService;
 	private CustomerRepository customerRepository;
-
-
 	public CustomerController(CustomerService customerService , CustomerRepository customerRepository, CustomerRepository customerRepository1) {
 		super();
 		this.customerService = customerService;
 		this.customerRepository = customerRepository1;
 	}
-
 	@GetMapping("/index")
 	public String index() {
 		return "index";
 	}
-
 	@GetMapping("/CustomerLogin")
 	public String CustomerLogin() {
 		return "CustomerLogin";
 	}
-
-	// handler method to handle list students and return mode and view
-	@GetMapping("/students")
-	public String listStudents(Model model) {
-		model.addAttribute("students", customerService.getAllStudents());
-		return "students";
+	@GetMapping("/customers")
+	public String listCustomers(Model model) {
+		model.addAttribute("customers", customerService.getAllCustomers());
+		return "customers";
 	}
-
-	@GetMapping("/students/new")
-	public String createStudentForm(Model model) {
-
-		// create student object to hold student form data
-		Customer student = new Customer();
-		model.addAttribute("student", student);
-		return "create_student";
-
+	@GetMapping("/customers/new")
+	public String createCustomerForm(Model model) {
+		Customer customer = new Customer();
+		model.addAttribute("customer", customer);
+		return "create_customer";
 	}
-
-	@PostMapping("/students")
-	public String saveStudent(@ModelAttribute("student") Customer student) {
-		customerService.saveStudent(student);
-		return "redirect:/students";
+	@PostMapping("/customers")
+	public String saveCustomer(@ModelAttribute("customer") Customer customer) {
+		customerService.saveCustomer(customer);
+		return "redirect:/customers";
 	}
-
-	@GetMapping("/students/edit/{id}")
-	public String editStudentForm(@PathVariable Long id, Model model) {
-		model.addAttribute("student", customerService.getStudentById(id));
-		return "edit_student";
+	@GetMapping("/customers/edit/{id}")
+	public String editCustomerForm(@PathVariable Long id, Model model) {
+		model.addAttribute("customer", customerService.getCustomerById(id));
+		return "edit_customer";
 	}
-
-	@PostMapping("/students/{id}")
-	public String updateStudent(@PathVariable Long id,
-			@ModelAttribute("student") Customer student,
-			Model model) {
-
-		// get student from database by id
-		Customer existingStudent = customerService.getStudentById(id);
-		existingStudent.setId(id);
-		existingStudent.setFirst_name(student.getFirst_name());
-		existingStudent.setLast_name(student.getLast_name());
-		existingStudent.setEmail(student.getEmail());
+	@PostMapping("/customers/{id}")
+	public String updateCustomer(@PathVariable Long id,
+								 @ModelAttribute("customer") Customer customer,
+								 Model model) {
+		Customer existingCustomer = customerService.getCustomerById(id);
+		existingCustomer.setId(id);
+		existingCustomer.setFirst_name(customer.getFirst_name());
+		existingCustomer.setLast_name(customer.getLast_name());
+		existingCustomer.setEmail(customer.getEmail());
 
 		// save updated student object
-		customerService.updateStudent(existingStudent);
-		return "redirect:/students";
+		customerService.updateCustomer(existingCustomer);
+		return "redirect:/customers";
 	}
-
-	// handler method to handle delete student request
-
-	@GetMapping("/students/{id}")
-	public String deleteStudent(@PathVariable Long id) {
-		customerService.deleteStudentById(id);
-		return "redirect:/students";
+	@GetMapping("/customers/{id}")
+	public String deleteCustomer(@PathVariable Long id) {
+		customerService.deleteCustomerById(id);
+		return "redirect:/customers";
 	}
-
 	@GetMapping("/search")
 	public String searchCustomer(@RequestParam("field") String field,
 								 @RequestParam("query") String query,
 								 Model model) {
 		List<Customer> searchResults = customerService.searchCustomer(field, query);
-		model.addAttribute("students", searchResults);
-		return "students";
+		model.addAttribute("customers", searchResults);
+		return "customers";
 	}
+	@GetMapping("/sync")
+	public ResponseEntity<Map<String, String>> syncData() {
+		CustomerApiClient customerApiClient = new CustomerApiClient();
+		List<Customer> customersFromApi = customerApiClient.getCustomerList();
 
+		if (customersFromApi != null) {
+			for (Customer apiCustomer : customersFromApi) {
+				Optional<Customer> optionalExistingCustomer = customerRepository.findByUuid(apiCustomer.getUuid());
 
-		@GetMapping("/sync")
-		public ResponseEntity<String> syncData() {
-			// Instantiate CustomerApiClient and call getCustomerList
-			CustomerApiClient customerApiClient = new CustomerApiClient();
-			List<Customer> customersFromApi = customerApiClient.getCustomerList();
-
-			if (customersFromApi != null) {
-				for (Customer apiCustomer : customersFromApi) {
-					// Check if a customer with the same UUID already exists in the database
-					Optional<Customer> optionalExistingCustomer = customerRepository.findByUuid(apiCustomer.getUuid());
-
-					if (optionalExistingCustomer.isPresent()) {
-						// Update existing customer
-						Customer existingCustomer = optionalExistingCustomer.get();
-						existingCustomer.setFirst_name(apiCustomer.getFirst_name());
-						existingCustomer.setLast_name(apiCustomer.getLast_name());
-						existingCustomer.setAddress(apiCustomer.getAddress());
-						existingCustomer.setCity(apiCustomer.getCity());
-						existingCustomer.setState(apiCustomer.getState());
-						existingCustomer.setEmail(apiCustomer.getEmail());
-						existingCustomer.setPhone(apiCustomer.getPhone());
-						customerRepository.save(existingCustomer);
-					} else {
-						// Save new customer
-						customerRepository.save(apiCustomer);
-					}
+				if (optionalExistingCustomer.isPresent()) {
+					Customer existingCustomer = optionalExistingCustomer.get();
+					// Update existing customer
+					existingCustomer.setFirst_name(apiCustomer.getFirst_name());
+					existingCustomer.setLast_name(apiCustomer.getLast_name());
+					existingCustomer.setAddress(apiCustomer.getAddress());
+					existingCustomer.setCity(apiCustomer.getCity());
+					existingCustomer.setState(apiCustomer.getState());
+					existingCustomer.setEmail(apiCustomer.getEmail());
+					existingCustomer.setPhone(apiCustomer.getPhone());
+					customerRepository.save(existingCustomer);
+				} else {
+					// Save new customer
+					customerRepository.save(apiCustomer);
 				}
-				return ResponseEntity.ok("Sync successful");
-			} else {
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error in syncing data");
 			}
+			return ResponseEntity.ok().body(Map.of("message", "Sync successful"));
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error in syncing data"));
 		}
+	}
 
 
 }

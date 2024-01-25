@@ -1,5 +1,4 @@
 package net.sunbase.assignment.service.impl;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -7,22 +6,16 @@ import net.sunbase.assignment.entity.Customer;
 import net.sunbase.assignment.repository.CustomerRepository;
 import net.sunbase.assignment.service.CustomerService;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
-
-	private CustomerRepository studentRepository;
-
+	private CustomerRepository customerRepository;
 	@PersistenceContext
 	private EntityManager entityManager;
-
-
-	public CustomerServiceImpl(CustomerRepository studentRepository) {
+	public CustomerServiceImpl(CustomerRepository customerRepository) {
 		super();
-		this.studentRepository = studentRepository;
-
+		this.customerRepository = customerRepository;
 	}
 	@Override
 	public List<Customer> searchCustomer(String field, String query) {
@@ -42,7 +35,6 @@ public class CustomerServiceImpl implements CustomerService {
 				break;
 			// Add more cases for other fields if needed
 		}
-
 		TypedQuery<Customer> typedQuery = entityManager.createQuery(sqlQuery, Customer.class);
 		typedQuery.setParameter("query", query);
 
@@ -50,29 +42,24 @@ public class CustomerServiceImpl implements CustomerService {
 		return typedQuery.getResultList();
 	}
 	@Override
-
-	public List<Customer> getAllStudents() {
-		return studentRepository.findAll();
+	public List<Customer> getAllCustomers() {
+		return customerRepository.findAll();
 	}
-
 	@Override
-	public Customer saveStudent(Customer student) {
-		return studentRepository.save(student);
+	public Customer saveCustomer(Customer customer) {
+		return customerRepository.save(customer);
 	}
-
 	@Override
-	public Customer getStudentById(Long id) {
-		return studentRepository.findById(id).get();
+	public Customer getCustomerById(Long id) {
+		return customerRepository.findById(id).get();
 	}
-
 	@Override
-	public Customer updateStudent(Customer student) {
-		return studentRepository.save(student);
+	public Customer updateCustomer(Customer customer) {
+		return customerRepository.save(customer);
 	}
-
 	@Override
-	public void deleteStudentById(Long id) {
-		studentRepository.deleteById(id);	
+	public void deleteCustomerById(Long id) {
+		customerRepository.deleteById(id);
 	}
 
 

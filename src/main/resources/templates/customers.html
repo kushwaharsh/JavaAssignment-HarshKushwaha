@@ -61,7 +61,7 @@
 				</li>
 			</ul>
 			<span class="navbar-text"><b>
-				By - Harsh Raj Kushwaha</b>>
+				By - Harsh Raj Kushwaha</b>
       </span>
 		</div>
 	</div>
@@ -74,7 +74,7 @@
 
 	<div class="row">
 		<div class="col-lg-3">
-			<a th:href="@{/students/new}" class="btn btn-primary btn-sm mb-3" id="add"> Add Customer</a>
+			<a th:href="@{/customers/new}" class="btn btn-primary btn-sm mb-3" id="add"> Add Customer</a>
 		</div>
 
 		<div class="col-lg-3">
@@ -127,19 +127,19 @@
 		</thead>
 
 		<tbody>
-		<tr th:each="student: ${students}">
-			<td th:text="${student.first_name}"></td>
-			<td th:text="${student.last_name}"></td>
+		<tr th:each="customer: ${customers}">
+			<td th:text="${customer.first_name}"></td>
+			<td th:text="${customer.last_name}"></td>
 <!--			<td th:text="${student.street}"></td>-->
-			<td th:text="${student.address}"></td>
-			<td th:text="${student.city}"></td>
-			<td th:text="${student.state}"></td>
-			<td th:text="${student.email}"></td>
-			<td th:text="${student.phone}"></td>
+			<td th:text="${customer.address}"></td>
+			<td th:text="${customer.city}"></td>
+			<td th:text="${customer.state}"></td>
+			<td th:text="${customer.email}"></td>
+			<td th:text="${customer.phone}"></td>
 			<td>
-				<a th:href="@{/students/edit/{id}(id=${student.id})}" class="btn btn-primary">Update</a>
+				<a th:href="@{/customers/edit/{id}(id=${customer.id})}" class="btn btn-primary">Update</a>
 
-				<a th:href="@{/students/{id}(id=${student.id})}" class="btn btn-danger">Delete</a>
+				<a th:href="@{/customers/{id}(id=${customer.id})}" class="btn btn-danger">Delete</a>
 
 			</td>
 		</tr>

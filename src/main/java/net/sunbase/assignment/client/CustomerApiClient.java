@@ -10,19 +10,16 @@ import java.util.List;
 
 public class CustomerApiClient {
     private final String apiBaseUrl = "https://qa.sunbasedata.com/sunbase/portal/api/assignment.jsp";
-    private final String token = "dGVzdEBzdW5iYXNlZGF0YS5jb206VGVzdEAxMjM=";
+    private final String token = "token";
+
     public List<Customer> getCustomerList() {
         String url = apiBaseUrl + "?cmd=get_customer_list";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
-
         HttpEntity<String> entity = new HttpEntity<>(headers);
-
         RestTemplate restTemplate = new RestTemplate();
-
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
             if (response.getStatusCode() == HttpStatus.OK) {
                 // Parse the JSON response
                 ObjectMapper objectMapper = new ObjectMapper();
